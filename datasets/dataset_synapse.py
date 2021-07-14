@@ -6,6 +6,8 @@ import torch
 from scipy import ndimage
 from scipy.ndimage.interpolation import zoom
 from torch.utils.data import Dataset
+import pandas as pd
+from PIL import Image
 
 
 def random_rot_flip(image, label):
@@ -47,29 +49,34 @@ class RandomGenerator(object):
 
 
 class Synapse_dataset(Dataset):
-    def __init__(self, base_dir, list_dir, split, transform=None):
+    def __init__(self, base_dir, annotation, split, mask, transform=None):
         self.transform = transform  # using transform in torch!
         self.split = split
-        self.sample_list = open(os.path.join(list_dir, self.split+'.txt')).readlines()
         self.data_dir = base_dir
+        self.df = pd.read_csv(annotation)
+        self.df = self.df[self.df['split'] == split]
+        self.df.reset_index(drop=True, inplace=True)
+        self.mask = mask
 
     def __len__(self):
-        return len(self.sample_list)
+        return len(self.df)
 
     def __getitem__(self, idx):
-        if self.split == "train":
-            slice_name = self.sample_list[idx].strip('\n')
-            data_path = os.path.join(self.data_dir, slice_name+'.npz')
-            data = np.load(data_path)
-            image, label = data['image'], data['label']
-        else:
-            vol_name = self.sample_list[idx].strip('\n')
-            filepath = self.data_dir + "/{}.npy.h5".format(vol_name)
-            data = h5py.File(filepath)
-            image, label = data['image'][:], data['label'][:]
-
+        info = self.df.iloc[idx]
+        image_path = info['img']
+        mask_path = info[self.mask]
+        # read the images and labels
+        image = Image.open(image_path)
+        label = Image.open(mask_path)
+        # change image to numpy
+        image = np.array(image)
+        label = np.array(label)
         sample = {'image': image, 'label': label}
         if self.transform:
             sample = self.transform(sample)
-        sample['case_name'] = self.sample_list[idx].strip('\n')
+        # data_type	data_id	data_ind
+        sample['data_type'] = info['data_type']
+        sample['data_id'] = info['data_id']
+        sample['data_ind'] = info['data_ind']
         return sample
+
