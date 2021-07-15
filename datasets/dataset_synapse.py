@@ -49,7 +49,7 @@ class RandomGenerator(object):
 
 
 class Synapse_dataset(Dataset):
-    def __init__(self, base_dir, annotation, split, mask, transform=None):
+    def __init__(self, base_dir, annotation, split, mask, img_size, transform=None):
         self.transform = transform  # using transform in torch!
         self.split = split
         self.data_dir = base_dir
@@ -57,6 +57,7 @@ class Synapse_dataset(Dataset):
         self.df = self.df[self.df['split'] == split]
         self.df.reset_index(drop=True, inplace=True)
         self.mask = mask
+        self.img_size = img_size
 
     def __len__(self):
         return len(self.df)
@@ -68,6 +69,9 @@ class Synapse_dataset(Dataset):
         # read the images and labels
         image = Image.open(image_path)
         label = Image.open(mask_path)
+        # resize
+        image = image.resize((self.img_size, self.img_size))
+        label = label.resize((self.img_size, self.img_size))
         # change image to numpy
         image = np.array(image)
         label = np.array(label)
