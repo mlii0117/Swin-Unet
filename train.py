@@ -18,8 +18,6 @@ parser.add_argument('--annotation_csv', help='the annotation file',
                     default='./datasets/annotation.csv', type=str)
 parser.add_argument('--masks', help='choose rater',
                     default='mask1', type=str)
-parser.add_argument('--list_dir', type=str,
-                    default='./lists/lists_Synapse', help='list dir')
 parser.add_argument('--num_classes', type=int,
                     default=2, help='output channel of network')
 parser.add_argument('--output_dir', type=str,
@@ -39,7 +37,8 @@ parser.add_argument('--img_size', type=int,
                     default=224, help='input patch size of network input')
 parser.add_argument('--seed', type=int,
                     default=1234, help='random seed')
-parser.add_argument('--cfg', type=str, required=True, metavar="FILE", help='path to config file', )
+parser.add_argument('--cfg', type=str, default='configs/swin_tiny_patch4_window7_224_lite.yaml',
+                    metavar="FILE", help='path to config file')
 parser.add_argument(
         "--opts",
         help="Modify config options by adding 'KEY VALUE' pairs. ",
@@ -62,8 +61,6 @@ parser.add_argument('--eval', action='store_true', help='Perform evaluation only
 parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
 args = parser.parse_args()
-if args.dataset == "Synapse":
-    args.root_path = os.path.join(args.root_path, "train_npz")
 config = get_config(args)
 
 
@@ -81,19 +78,9 @@ if __name__ == "__main__":
     torch.cuda.manual_seed(args.seed)
 
     dataset_name = args.dataset
-    dataset_config = {
-        'Synapse': {
-            'root_path': args.root_path,
-            'list_dir': './lists/lists_Synapse',
-            'num_classes': 2,
-        },
-    }
 
     if args.batch_size != 24 and args.batch_size % 6 == 0:
         args.base_lr *= args.batch_size / 24
-    args.num_classes = dataset_config[dataset_name]['num_classes']
-    args.root_path = dataset_config[dataset_name]['root_path']
-    args.list_dir = dataset_config[dataset_name]['list_dir']
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
