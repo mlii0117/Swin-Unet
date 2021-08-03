@@ -15,6 +15,7 @@ from networks.vision_transformer import SwinUnet as ViT_seg
 from trainer import trainer_synapse
 from config import get_config
 from torchvision import transforms
+# test
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--root_path', type=str,
