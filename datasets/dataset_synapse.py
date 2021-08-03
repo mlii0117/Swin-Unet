@@ -81,7 +81,7 @@ class Synapse_dataset(Dataset):
         image_path = info['img']
         mask_path = info[self.mask]
         # read the images and labels
-        image = Image.open(os.path.join(self.data_dir, image_path))
+        image = Image.open(os.path.join(self.data_dir, image_path)).convert('L')
         label = Image.open(os.path.join(self.data_dir, mask_path))
         # change image to numpy
         image = np.array(image)
