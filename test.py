@@ -15,7 +15,10 @@ from networks.vision_transformer import SwinUnet as ViT_seg
 from trainer import trainer_synapse
 from config import get_config
 from torchvision import transforms
-## test
+## test 
+
+a = 1+1
+print(a)
 
 
 parser = argparse.ArgumentParser()
